@@ -29,7 +29,7 @@ Motor4A = 23
 Motor4B = 24
 encPin4A = 8
 encPin4B = 7
-
+ 
 ########################################################## Pin assign
 
 IO.setmode(IO.BCM)
@@ -269,11 +269,11 @@ while True:
     IO.output(Motor3A, control3 >= 0)
     IO.output(Motor3B, control3 <= 0)
     PWM1.ChangeDutyCycle(min(abs(control3), 100))
-    
-    IO.output(Motor4A, control4 >= 0)
+
+    IO.output(Motor4A, control4 >= 0) 
     IO.output(Motor4B, control4 <= 0)
     PWM1.ChangeDutyCycle(min(abs(control4), 100))
-    #########################
+    ######################### 에러랑 등등 확인용 print 임.
 
     print('1___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error1, Kd * de1 / dt, Ki * de1 * dt))
     print('1__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos1, motorDeg1, error1, control1))
@@ -291,9 +291,39 @@ while True:
     print('4__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos4, motorDeg4, error4, control4))
     print('4__%f, %f' % (de4, dt))
 
-    if abs(error) <= tolerance:
-        IO.output(Motor1A, control >= 0)
+    ########################## 이 부분 때문에 일정 시간 지난 다음 손으로 내리면 Detecting 안하는거임.
+    
+    Modifying_Token =0 #4가지 모터가 전부 범위 내에 있을 때를 위함.
+    
+    if abs(error1) <= tolerance:
+        IO.output(Motor1A, control1 >= 0)
+        IO.output(Motor1B, control1 <= 0)
         PWM1.ChangeDutyCycle(0)
+        Modifying_Token +=1
+        
+    if abs(error2) <= tolerance:
+        IO.output(Motor2A, control2 >= 0)
+        IO.output(Motor2B, control2 <= 0)
+        PWM2.ChangeDutyCycle(0)
+        Modifying_Token +=1
+        
+    if abs(error3) <= tolerance:
+        IO.output(Motor3A, control3 >= 0)
+        IO.output(Motor3B, control3 <= 0)
+        PWM3.ChangeDutyCycle(0)
+        Modifying_Token +=1
+        
+    if abs(error4) <= tolerance:
+        IO.output(Motor4A, control4 >= 0)
+        IO.output(Motor4B, control4 <= 0)
+        PWM4.ChangeDutyCycle(0)
+        Modifying_Token +=1
+        
+    if Modifying_Token >= 4 :
         break
 
     time.sleep(dt_sleep)
+    
+    
+    
+    
