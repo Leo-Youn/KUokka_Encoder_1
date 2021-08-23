@@ -275,10 +275,21 @@ while True:
     PWM1.ChangeDutyCycle(min(abs(control4), 100))
     #########################
 
-    print('P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error, Kd * de / dt, Ki * de * dt))
-    print('time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (
-    time.time() - start_time, encoderPos, motorDeg, error, control))
-    print('%f, %f' % (de, dt))
+    print('1___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error1, Kd * de1 / dt, Ki * de1 * dt))
+    print('1__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos1, motorDeg1, error1, control1))
+    print('1__%f, %f' % (de1, dt))
+    
+    print('2___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error2, Kd * de2 / dt, Ki * de2 * dt))
+    print('2__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos2, motorDeg2, error2, control2))
+    print('2__%f, %f' % (de1, dt))
+    
+    print('3___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error3, Kd * de3 / dt, Ki * de3 * dt))
+    print('3__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos3, motorDeg3, error3, control3))
+    print('3__%f, %f' % (de3, dt))
+    
+    print('4___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error4, Kd * de4 / dt, Ki * de4 * dt))
+    print('4__time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (time.time() - start_time, encoderPos4, motorDeg4, error4, control4))
+    print('4__%f, %f' % (de4, dt))
 
     if abs(error) <= tolerance:
         IO.output(Motor1A, control >= 0)
