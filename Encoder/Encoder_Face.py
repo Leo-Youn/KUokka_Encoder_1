@@ -295,7 +295,7 @@ while True:
     
     Modifying_Token =0 #4가지 모터가 전부 범위 내에 있을 때를 위함.
     
-    if abs(error1) <= tolerance :
+    if abs(error1) <= tolerance:
         IO.output(Motor1A, control1 >= 0)
         IO.output(Motor1B, control1 <= 0)
         PWM1.ChangeDutyCycle(0)
