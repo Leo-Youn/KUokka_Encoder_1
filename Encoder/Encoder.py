@@ -103,7 +103,7 @@ IO.add_event_detect(encPin1B, IO.BOTH, callback=encoderB)
 
 
 ratio = 360. / 270. / 64.
-targetDeg = encoderPos * ratio
+targetDeg = encoderPos1 * ratio
 Kp = 5.
 Kd = 3.
 Ki = 3.
@@ -117,7 +117,7 @@ error_prev = 0.
 time_prev = 0.
 
 while True:
-    motorDeg = encoderPos * ratio
+    motorDeg = encoderPos1 * ratio
 
     error = targetDeg - motorDeg
     de = error - error_prev
@@ -128,9 +128,9 @@ while True:
     time_prev = time.time()
 
     IO.output(Motor1A, control >= 0)
-    p.ChangeDutyCycle(min(abs(control), 100))
+    PWM1.ChangeDutyCycle(min(abs(control), 100))
     IO.output(Motor1B, control >= 0)
-    p.ChangeDutyCycle(min(abs(control), 100))
+    PWM1.ChangeDutyCycle(min(abs(control), 100))
 
     print('P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error, Kd * de / dt, Ki * de * dt))
     print('time = %6.3f, enc = %d, deg = %5.1f, err = %5.1f, ctrl = %7.1f' % (
@@ -138,8 +138,8 @@ while True:
     print('%f, %f' % (de, dt))
 
     if abs(error) <= tolerance:
-        IO.output(dirPin, control >= 0)
-        p.ChangeDutyCycle(0)
+        IO.output(Motor1A, control >= 0)
+        PWM1.ChangeDutyCycle(0)
         break
-#근데 이렇게 하면 무슨 문제가 생기냐;;
+
     time.sleep(dt_sleep)
