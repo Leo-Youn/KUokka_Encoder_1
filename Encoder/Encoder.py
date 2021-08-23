@@ -141,5 +141,5 @@ while True:
         IO.output(dirPin, control >= 0)
         p.ChangeDutyCycle(0)
         break
-
+#근데 이렇게 하면 무슨 문제가 생기냐;;
     time.sleep(dt_sleep)
