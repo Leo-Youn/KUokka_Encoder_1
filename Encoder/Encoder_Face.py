@@ -185,15 +185,6 @@ while True:
   # ------------------------------------------------------------------
   # ------------------------------------------------------------------
 
-  # visualize
-  #cv2.imshow('original', ori)
-  img = cv2.flip(img, 1)
-  cv2.imshow('facial landmarks', img)
-
-  if cv2.waitKey(1) == ord('q'):
-    sys.exit(1)
-
-
 
 #모터 1번, 제일 하부, 좌우 담당
 Motor1E = 2
@@ -457,15 +448,15 @@ while True:
     
     IO.output(Motor2A, control2 >= 0)
     IO.output(Motor2B, control2 <= 0)
-    PWM1.ChangeDutyCycle(min(abs(control2), 100))
+    PWM2.ChangeDutyCycle(min(abs(control2), 100))
     
     IO.output(Motor3A, control3 >= 0)
     IO.output(Motor3B, control3 <= 0)
-    PWM1.ChangeDutyCycle(min(abs(control3), 100))
+    PWM3.ChangeDutyCycle(min(abs(control3), 100))
 
     IO.output(Motor4A, control4 >= 0) 
     IO.output(Motor4B, control4 <= 0)
-    PWM1.ChangeDutyCycle(min(abs(control4), 100))
+    PWM4.ChangeDutyCycle(min(abs(control4), 100))
     ######################### 에러랑 등등 확인용 print 임.
 
     print('1___P-term = %7.1f, D-term = %7.1f, I-term = %7.1f' % (Kp * error1, Kd * de1 / dt, Ki * de1 * dt))

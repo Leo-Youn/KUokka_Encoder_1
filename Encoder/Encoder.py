@@ -296,26 +296,26 @@ while True:
     Modifying_Token =0 #4가지 모터가 전부 범위 내에 있을 때를 위함.
     
     if abs(error1) <= tolerance :
-        IO.output(Motor1A, control1 >= 0)
-        IO.output(Motor1B, control1 <= 0)
+        IO.output(Motor1A, control1 = 0)
+        IO.output(Motor1B, control1 = 0)
         PWM1.ChangeDutyCycle(0)
         Modifying_Token +=1
         
     if abs(error2) <= tolerance:
-        IO.output(Motor2A, control2 >= 0)
-        IO.output(Motor2B, control2 <= 0)
+        IO.output(Motor2A, control2 = 0)
+        IO.output(Motor2B, control2 = 0)
         PWM2.ChangeDutyCycle(0)
         Modifying_Token +=1
         
     if abs(error3) <= tolerance:
-        IO.output(Motor3A, control3 >= 0)
-        IO.output(Motor3B, control3 <= 0)
+        IO.output(Motor3A, control3 = 0)
+        IO.output(Motor3B, control3 = 0)
         PWM3.ChangeDutyCycle(0)
         Modifying_Token +=1
         
     if abs(error4) <= tolerance:
-        IO.output(Motor4A, control4 >= 0)
-        IO.output(Motor4B, control4 <= 0)
+        IO.output(Motor4A, control4 = 0)
+        IO.output(Motor4B, control4 = 0)
         PWM4.ChangeDutyCycle(0)
         Modifying_Token +=1
         
