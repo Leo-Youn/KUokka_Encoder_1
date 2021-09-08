@@ -250,16 +250,16 @@ while True:
 
     #에러 미분용 이전 값.
     error_prev1 = error1
-    error_prev2 = error2
+    error_prev2 = error2 
     error_prev3 = error3
-    error_prev4 = error4
+    error_prev4 = error4 
     
     time_prev = time.time()
 
     #모터 돌아가게 하는거임. ################################################이부분 약간 위험함. Motor output 설정이 정확한지 모르겠음. 
     #각 모터 옆에 control 조건문이 결국 1, 0을 담당하는데(참 거짓에 따라서 참은1 거짓은0), 이렇게 써도 되려나????
     IO.output(Motor1A, control1 >= 0)
-    IO.output(Motor1B, control1 <= 0)
+    IO.output(Motor1B, control1 <= 0) 
     PWM1.ChangeDutyCycle(min(abs(control1), 100))
     
     IO.output(Motor2A, control2 >= 0)

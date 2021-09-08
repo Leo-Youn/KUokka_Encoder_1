@@ -4,12 +4,13 @@ import cv2, dlib
 import numpy as np
 import sys, os
 
+Margin = 20
 
 #모터 1번, 제일 하부, 좌우 담당
 Motor1E = 2
 Motor1A = 3
 Motor1B = 4
-encPin1A = 17
+encPin1A = 17 
 encPin1B = 27
 
 #모터 2번, 하부에서 두번째, 거리 담당.
@@ -173,6 +174,7 @@ IO.add_event_detect(encPin2B, IO.BOTH, callback=encoder2B)
 IO.add_event_detect(encPin3A, IO.BOTH, callback=encoder3A)
 IO.add_event_detect(encPin3B, IO.BOTH, callback=encoder3B)
 
+
 IO.add_event_detect(encPin4A, IO.BOTH, callback=encoder4A)
 IO.add_event_detect(encPin4B, IO.BOTH, callback=encoder4B)
 
@@ -187,8 +189,13 @@ targetDeg2 = encoderPos2 * ratio
 targetDeg3 = encoderPos3 * ratio
 targetDeg4 = encoderPos4 * ratio
 
-#################################################### PID 계수 설정.
+# target 일정수준 이상 넘어가면 멈추게, 영훈이의 건강을 위함.
+safetarget_1 = targetDeg1
+safetarget_2 = targetDeg2
+safetarget_3 = targetDeg3
+safetarget_4 = targetDeg4
 
+#################################################### PID 계수 설정.
 Kp = 5.
 Kd = 3.
 Ki = 3.
@@ -267,7 +274,7 @@ while True:
   
     #모터 돌아가게 하는거임. ################################################이부분 약간 위험함. Motor output 설정이 정확한지 모르겠음. 
     #각 모터 옆에 control 조건문이 결국 1, 0을 담당하는데(참 거짓에 따라서 참은1 거짓은0), 이렇게 써도 되려나????
-    IO.output(Motor1A, control1 >= 0)
+    IO.output(Motor1A, control1 >= 0) 
     IO.output(Motor1B, control1 <= 0)
     PWM1.ChangeDutyCycle(min(abs(control1), 100))
     
@@ -303,8 +310,7 @@ while True:
     ########################## 이 부분 때문에 일정 시간 지난 다음 손으로 내리면 Detecting 안하는거임.
     
     
-    
-    if abs(error1) <= tolerance:
+    if abs(error1) <= tolerance: 
         IO.output(Motor1A, 0)
         IO.output(Motor1B, 0)
         PWM1.ChangeDutyCycle(0)
@@ -329,55 +335,45 @@ while True:
 
     time.sleep(dt_sleep)
     
-  # read frame buffer from video
-  ret, img = cap.read()
-  if not ret:
-    break
+    # read frame buffer from video
+    ret, img = cap.read()
+    if not ret:
+        break
 
-  # resize frame
-  img = cv2.resize(img, (int(img.shape[1] * scaler), int(img.shape[0] * scaler)))
-  ori = img.copy()
+    # resize frame
+    img = cv2.resize(img, (int(img.shape[1] * scaler), int(img.shape[0] * scaler)))
+    ori = img.copy()
 
-  # find faces
-  if len(face_roi) == 0:
-    faces = detector(img, 1)
-  else:
-    roi_img = img[face_roi[0]:face_roi[1], face_roi[2]:face_roi[3]]
-    # cv2.imshow('roi', roi_img)
-    faces = detector(roi_img)
-
-  # no faces
-  if len(faces) == 0:
-    print('no faces!')
-
-    # if angle over 45
-    if direction == 1 :    # 만약 얼굴이 왼쪽으로
-          direction = 3    # 45도 이상 넘어간 경우
-    elif direction == 2 :  # 만약 얼굴이 오른쪽으로
-          direction = 4    # 45도 이상 넘어간 경우
-    elif direction == 0 :  # 시작부터 얼굴을 찾을 수 없을 때
-          direction = 5    # 얼굴을 못찾는 경우
-
-    # if face over screen
-    if location == 1 :    # 만약 얼굴이 위쪽으로
-          location = 3    # 넘어간 경우
-    elif location == 2 :  # 만약 얼굴이 아래쪽으로
-          location = 4    # 넘어간 경우
-    elif location == 0 :  # 시작부터 얼굴을 찾을 수 없을 때
-          location = 5    # 얼굴을 못찾는 경우
-
-  # find facial landmarks
-  for face in faces:
+    # find faces
     if len(face_roi) == 0:
-      dlib_shape = predictor(img, face)
-      shape_2d = np.array([[p.x, p.y] for p in dlib_shape.parts()])
+        faces = detector(img, 1)
     else:
-      dlib_shape = predictor(roi_img, face)
-      shape_2d = np.array([[p.x + face_roi[2], p.y + face_roi[0]] for p in dlib_shape.parts()])
+        roi_img = img[face_roi[0]:face_roi[1], face_roi[2]:face_roi[3]]
+        # cv2.imshow('roi', roi_img)
+        faces = detector(roi_img)
+
+    # no faces
+    if len(faces) == 0:
+        print('no faces!')
+
+        # if angle over 45
+        direction = 3    # 얼굴을 못찾는 경우
+
+        # if face over screen
+        location = 3    # 얼굴을 못찾는 경우
+
+     # find facial landmarks
+    for face in faces:
+        if len(face_roi) == 0:
+            dlib_shape = predictor(img, face)
+            shape_2d = np.array([[p.x, p.y] for p in dlib_shape.parts()])
+        else:
+            dlib_shape = predictor(roi_img, face)
+            shape_2d = np.array([[p.x + face_roi[2], p.y + face_roi[0]] for p in dlib_shape.parts()])
 
     for s in shape_2d:
       cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
-    
+
     # compute face center
     center_x, center_y = np.mean(shape_2d, axis=0).astype(np.int)
 
@@ -404,7 +400,7 @@ while True:
     # ------------------------------------------------------------------
     # ----------------------------face angle----------------------------
     # ------------------------------------------------------------------
-  
+
     # eyes
     left_eye = [int((shape_2d[43][0]+shape_2d[44][0]+shape_2d[46][0]+shape_2d[47][0])/4), int((shape_2d[43][1]+shape_2d[44][1]+shape_2d[46][1]+shape_2d[47][1])/4)]
     right_eye = [int((shape_2d[37][0]+shape_2d[38][0]+shape_2d[40][0]+shape_2d[41][0])/4), int((shape_2d[37][1]+shape_2d[38][1]+shape_2d[40][1]+shape_2d[41][1])/4)]
@@ -414,20 +410,28 @@ while True:
     # nose
     nose = shape_2d[30]
     cv2.circle(img, center=tuple(nose), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
-    
+
     # direction - left or right
     # 0 - center, 1 - left, 2 - right
     if (left_eye[0] - nose[0]) > (nose[0] - right_eye[0]):
-      if (left_eye[0] - nose[0]) - (nose[0] - right_eye[0]) > 20:
+      if (left_eye[0] - nose[0]) - (nose[0] - right_eye[0]) > Margin:
         direction = 2   # right
       else:
         direction = 0   # center
     else:
-      if (nose[0] - right_eye[0] - (left_eye[0] - nose[0])) > 20:
-        direction = 1   # left   
+      if (nose[0] - right_eye[0] - (left_eye[0] - nose[0])) > Margin:
+        direction = 1   # left
       else:
         direction = 0   # center
 
+    if (center_y - nose[1] > Margin):
+        direction_y = 4     #up
+    elif (nose[1] - center_y>Margin):
+        direction_y = 5     #down
+    else:
+        direction_y = 0    #center
+    
+    
     # center_screen, center_face
     height, width, channel = img.shape
     center_screen = [int(width/2), int(height/2)]
@@ -438,61 +442,106 @@ while True:
     # location - top or bottom
     # 0 - center, 1 - top, 2 - bottom
     if center[1] > height/2:
-      if center[1] - height/2 > 20:
+      if center[1] - height/2 > Margin:
           location = 2   # bottom
       else:
           location = 0   # center
     else:
-        if height/2 - center[1] > 20:
+        if height/2 - center[1] > Margin:
           location = 1   # top
         else:
-          location = 0   # center 
+          location = 0   # center
 
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------
     # ------------------------------------------------------------------
-  
 
-  # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
   # ------------------------------result------------------------------
   # ------------------------------------------------------------------
   # 각 경우에 맞게 모터 제어 필요
-  os.system('cls')
+    os.system('cls')
 
-  # direction 
-  # 1, 4번 모터 제어
-  if direction == 0 :
+  # direction
+  # 1번 모터 제어
+    if direction == 0 :
         print("direction : center")
-  elif direction == 1 :
-        print("direction : left") 
-  elif direction == 2 :
+        
+    elif direction == 1 :
+        print("direction : left")
+        if targetDeg1 > safetarget_1 -30:
+            targetDeg1 -= 0.05
+                
+    elif direction == 2 :
         print("direction : right")
-  elif direction == 3 :
-        print("direction : left over")
-  elif direction == 4 :
-        print("direction : right over")
-  elif direction == 5 :
+        if targetDeg1 < safetarget_1 +30:
+            targetDeg1 += 0.05
+        
+    elif direction == 3 :
         print("direction : no face")
-    
+
+        ###################################################
+#Direction of Y        
+    if direction_y ==0 : #center
+        print("direction_y : center")
+    elif direction == 4 :
+        print("direction : UP")
+        if targetDeg4 > safetarget_4 -30:
+            targetDeg4 -= 0.05
+    elif direction == 5 :
+        print("direction : Down")
+        if targetDeg4 < safetarget_4 +30:
+            targetDeg4 += 0.05
+    elif direction ==6 :    
+     print("direction : no face")
+        
+
   # location
-  if location == 0 :
+  # 2,3,4번 모터 제어 //4번 모터 관련된 내용은 얼굴인식 파트 코딩 후 수정 예정 (08/27)
+    # 2,3,4번 같이 움직임. 2번과 4번은 같은 방향, 3번은 반대방향 
+    if location == 0 :
         print("location : center")
-  elif location == 1 :
-        print("location : top")  
-  elif location == 2 :
-        print("location : bottom") 
-  elif location == 3 :
-        print("location : top over")
-  elif location == 4 :
-        print("location : bottom over")
-  elif location == 5 :
+        
+    elif location == 1 :
+        print("location : top") #낮춘다.
+        if targetDeg2 < safetarget_2 + 30
+            targetDeg2 += 0.05
+        if targetDeg3 > safetarget_3 -30
+            targetDeg3 -= 0.05
+        if targetDeg4 > safetarget_4 -30
+            targetDeg4 -= 0.05
+        
+    elif location == 2 :
+        print("location : bottom") #높인다.
+        if targetDeg2 > safetarget_2-30
+            targetDeg2 -= 0.05
+        if targetDeg3 < safetarget_3 +30
+            targetDeg3 += 0.05
+        if targetDeg4 < safetarget_4 +30
+            targetDeg4 += 0.05
+        
+        
+    elif location == 3 :
         print("location : no face")
+        
+    
+
 
   # ------------------------------------------------------------------
   # ------------------------------------------------------------------
-  # ------------------------------------------------------------------
+    
+    
+    
+    
+  # ------------------------------------------------------------------ 
 
-    
-    
-    
-    
+#To do List
+#1. 얼굴이 위를 바라보는지, 아래를 바라보는지 마진 줄이고 테스팅.
+#2  전체적인 코드 확인
+#3 
+
+
+
+
+
